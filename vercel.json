@@ -7,18 +7,6 @@
     {
       "source": "/image-api/:path*",
       "destination": "http://api2026.otobathanh.vn/api/ImageAPI/:path*"
-    },
-    {
-  "rewrites": [
-    {
-      "source": "/upload-api",
-      "destination": "http://api2026.otobathanh.vn/api/ImageAPI/UploadFiles"
-    },
-    {
-      "source": "/image-api/:path*",
-      "destination": "http://api2026.otobathanh.vn/api/ImageAPI/:path*"
     }
-  ]
-}
   ]
 }
