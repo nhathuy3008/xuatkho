@@ -1158,6 +1158,7 @@ const processQr =
   {
     headers: {
       Accept: "application/json",
+      "X-Api-Key": WAREHOUSE_API_KEY,
     },
   }
 );
