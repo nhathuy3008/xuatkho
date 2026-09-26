@@ -67,28 +67,114 @@ const buildPartsDocKey = (
   return `hpt/${code}`;
 
 };
+const compressImageIfNeeded = async (file) => {
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+  const TARGET_SIZE = 1.5 * 1024 * 1024; // khoảng 1.5MB
+  const MAX_SIZE = 2000; // tối đa 2000px
 
-const uploadDocumentFile = async (
+  // Ảnh <= 2MB thì giữ nguyên
+  if (file.size <= MAX_FILE_SIZE) {
+    return file;
+  }
 
-  soChungTu,
+  console.log(
+    `Ảnh gốc: ${(file.size / 1024 / 1024).toFixed(2)}MB`
+  );
 
-  file,
+  const imageUrl = URL.createObjectURL(file);
 
-  onProgress
+  try {
+    const image = new Image();
 
-) => {
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = reject;
+      image.src = imageUrl;
+    });
+
+    let width = image.naturalWidth;
+    let height = image.naturalHeight;
+
+    // Resize nếu ảnh quá lớn
+    if (width > MAX_SIZE || height > MAX_SIZE) {
+      const scale = Math.min(
+        MAX_SIZE / width,
+        MAX_SIZE / height
+      );
+
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      return file;
+    }
+
+    ctx.drawImage(image, 0, 0, width, height);
+
+    let quality = 0.85;
+    let blob = null;
+
+    // Giảm chất lượng dần cho tới khi <= 1.5MB
+    for (let i = 0; i < 6; i++) {
+      blob = await new Promise((resolve) => {
+        canvas.toBlob(
+          resolve,
+          "image/jpeg",
+          quality
+        );
+      });
+
+      if (!blob) {
+        return file;
+      }
+
+      if (blob.size <= TARGET_SIZE) {
+        break;
+      }
+
+      quality -= 0.1;
+    }
+
+    if (!blob) {
+      return file;
+    }
+
+    const compressedFile = new File(
+      [blob],
+      `${file.name.replace(/\.[^/.]+$/, "")}.jpg`,
+      {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      }
+    );
+
+    console.log(
+      `Ảnh sau nén: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`
+    );
+
+    return compressedFile;
+
+  } catch (error) {
+    console.error("Không thể nén ảnh:", error);
+    return file;
+
+  } finally {
+    URL.revokeObjectURL(imageUrl);
+  }
+};
+const uploadDocumentFile = async (soChungTu, file, onProgress) => {
+  const uploadFile = await compressImageIfNeeded(file);
 
   const formData = new FormData();
 
-  formData.append(
-
-    "file",
-
-    file,
-
-    file.name
-
-  );
+  formData.append("file", uploadFile, uploadFile.name);
 
   return new Promise((resolve, reject) => {
 
