@@ -68,18 +68,12 @@ const buildPartsDocKey = (
 
 };
 const compressImageIfNeeded = async (file) => {
-  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
-  const TARGET_SIZE = 1.5 * 1024 * 1024; // khoảng 1.5MB
-  const MAX_SIZE = 2000; // tối đa 2000px
+  const MAX_SIZE = 2000;
+  const TARGET_SIZE = 1.5 * 1024 * 1024;
 
-  // Ảnh <= 2MB thì giữ nguyên
-  if (file.size <= MAX_FILE_SIZE) {
+  if (!file?.type?.startsWith("image/")) {
     return file;
   }
-
-  console.log(
-    `Ảnh gốc: ${(file.size / 1024 / 1024).toFixed(2)}MB`
-  );
 
   const imageUrl = URL.createObjectURL(file);
 
@@ -95,7 +89,6 @@ const compressImageIfNeeded = async (file) => {
     let width = image.naturalWidth;
     let height = image.naturalHeight;
 
-    // Resize nếu ảnh quá lớn
     if (width > MAX_SIZE || height > MAX_SIZE) {
       const scale = Math.min(
         MAX_SIZE / width,
@@ -121,7 +114,6 @@ const compressImageIfNeeded = async (file) => {
     let quality = 0.85;
     let blob = null;
 
-    // Giảm chất lượng dần cho tới khi <= 1.5MB
     for (let i = 0; i < 6; i++) {
       blob = await new Promise((resolve) => {
         canvas.toBlob(
@@ -146,7 +138,7 @@ const compressImageIfNeeded = async (file) => {
       return file;
     }
 
-    const compressedFile = new File(
+    return new File(
       [blob],
       `${file.name.replace(/\.[^/.]+$/, "")}.jpg`,
       {
@@ -154,16 +146,6 @@ const compressImageIfNeeded = async (file) => {
         lastModified: Date.now(),
       }
     );
-
-    console.log(
-      `Ảnh sau nén: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`
-    );
-
-    return compressedFile;
-
-  } catch (error) {
-    console.error("Không thể nén ảnh:", error);
-    return file;
 
   } finally {
     URL.revokeObjectURL(imageUrl);
