@@ -28,7 +28,7 @@ import {
 
 import "./styles.css";
 
-const WAREHOUSE_API_BASE = "/warehouse-api";
+const WAREHOUSE_API_BASE = "https://local.otobathanh.vn/api";
 
 const WAREHOUSE_API_KEY =
   import.meta.env.VITE_WAREHOUSE_API_KEY ||
@@ -1158,7 +1158,6 @@ const processQr =
   {
     headers: {
       Accept: "application/json",
-      "X-Api-Key": WAREHOUSE_API_KEY,
     },
   }
 );
