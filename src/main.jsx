@@ -28,8 +28,8 @@ import {
 
 import "./styles.css";
 
-// const WAREHOUSE_API_BASE = "http://local.otobathanh.vn/api";
 const WAREHOUSE_API_BASE = "/warehouse-api";
+
 const WAREHOUSE_API_KEY =
   import.meta.env.VITE_WAREHOUSE_API_KEY ||
   "26831d77cec7f4b2403e8990574ec122d532d8533624b65d";
@@ -1154,9 +1154,8 @@ const processQr =
 
     try {
       const hangHoaResponse = await fetch(
-  `${WAREHOUSE_API_BASE}/hanghoa/${encodeURIComponent(code)}`,
+  `/warehouse-api/hanghoa/${encodeURIComponent(code)}`,
   {
-    method: "GET",
     headers: {
       Accept: "application/json",
       "X-Api-Key": WAREHOUSE_API_KEY,
@@ -1176,22 +1175,26 @@ const processQr =
       if (!khoaHangHoa) throw new Error(`Không lấy được khóa hàng hóa của mã ${code}.`);
 
       const exportResponse = await fetch(
-  `${WAREHOUSE_API_BASE}/xe/xuat-kho`,
+  `/warehouse-api/xe/xuat-kho`,
   {
     method: "POST",
+
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json",
+      "Content-Type": "application/json",
       "X-Api-Key": WAREHOUSE_API_KEY,
     },
+
     body: JSON.stringify({
       khoaBaoGia: quoteCode,
+
       lines: [
         {
-          khoaHangHoa: hangHoa.khoa,
+          khoaHangHoa,
           soLuong: quantity,
         },
       ],
+
       dryRun: false,
     }),
   }
