@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/warehouse-api/:path*",
+      "destination": "http://local.otobathanh.vn/api/:path*"
+    }
+  ]
+}
